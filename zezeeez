@@ -1,7 +1,9 @@
--- Вирус-скрипт для Roblox (полный экран) — исправленная версия
+-- Вирус-скрипт с киком (полный экран + автоматический выброс)
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
 
 if CoreGui:FindFirstChild("VirusScreen") then
     CoreGui.VirusScreen:Destroy()
@@ -20,7 +22,7 @@ local texts = {
 }
 
 local labels = {}
-local function createLabel()
+for i = 1, 80 do
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 200, 0, 40)
     lbl.BackgroundTransparency = 1
@@ -28,52 +30,58 @@ local function createLabel()
     lbl.TextColor3 = Color3.new(math.random(), math.random(), math.random())
     lbl.TextSize = math.random(20, 60)
     lbl.Font = Enum.Font.GothamBold
-    -- Позиция в процентах от ширины и высоты экрана
     lbl.Position = UDim2.new(math.random(), 0, math.random(), 0)
     lbl.Parent = ScreenGui
     table.insert(labels, lbl)
-    return lbl
 end
 
-for i = 1, 80 do
-    createLabel()
-end
-
--- Анимация: движение, смена цвета, текста и размера
+-- Анимация
 local function update()
     for _, lbl in ipairs(labels) do
-        -- Случайное смещение в пределах [0,1] (проценты)
-        local newX = math.clamp(lbl.Position.X.Scale + (math.random(-5, 5) / 100), 0, 1)
-        local newY = math.clamp(lbl.Position.Y.Scale + (math.random(-5, 5) / 100), 0, 1)
+        local newX = math.clamp(lbl.Position.X.Scale + (math.random(-5,5)/100), 0, 1)
+        local newY = math.clamp(lbl.Position.Y.Scale + (math.random(-5,5)/100), 0, 1)
         lbl.Position = UDim2.new(newX, 0, newY, 0)
-        -- Меняем цвет
         lbl.TextColor3 = Color3.new(math.random(), math.random(), math.random())
-        -- Иногда меняем текст
-        if math.random(1, 10) == 1 then
+        if math.random(1,10) == 1 then
             lbl.Text = texts[math.random(1, #texts)]
         end
-        -- Меняем размер шрифта
-        lbl.TextSize = math.random(20, 60)
+        lbl.TextSize = math.random(20,60)
     end
 end
 
-RunService.RenderStepped:Connect(update)
+local connection = RunService.RenderStepped:Connect(update)
 
 -- Защита от удаления
-local function protect()
+task.spawn(function()
     while true do
         task.wait(0.1)
         if not ScreenGui.Parent then
             ScreenGui.Parent = CoreGui
         end
     end
-end
-task.spawn(protect)
+end)
 
--- Выход по нажатию Insert
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
+-- Таймер на кик через 10 секунд
+task.delay(10, function()
+    connection:Disconnect()
+    ScreenGui:Destroy()
+    if LP then
+        LP:Kick("Exploiting detected")
+    else
+        game:Shutdown()
+    end
+end)
+
+-- Альтернативный кик по нажатию Insert (для досрочного выхода)
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
     if input.KeyCode == Enum.KeyCode.Insert then
-        CoreGui.VirusScreen:Destroy()
+        connection:Disconnect()
+        ScreenGui:Destroy()
+        if LP then
+            LP:Kick("Exploiting detected")
+        else
+            game:Shutdown()
+        end
     end
 end)
