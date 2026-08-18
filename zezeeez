@@ -1,24 +1,28 @@
--- Вирус-скрипт с киком (полный экран + автоматический выброс)
+-- Пранк-скрипт с автокиком (тексты ты можешь заменить)
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("VirusScreen") then
-    CoreGui.VirusScreen:Destroy()
+if CoreGui:FindFirstChild("PrankScreen") then
+    CoreGui.PrankScreen:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "VirusScreen"
+ScreenGui.Name = "PrankScreen"
 ScreenGui.Parent = CoreGui
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
 
+-- ЗАМЕНИ ЭТИ СТРОКИ НА ЛЮБЫЕ ДРУГИЕ, КАКИЕ ХОЧЕШЬ
 local texts = {
-    "you are loser",
-    "fatass nigga",
-    "XD"
+    "Ты попался!",
+    "Пранк!",
+    "Ха-ха",
+    "Красавчик",
+    "Ахахаха",
+    "Лови пранк!"
 }
 
 local labels = {}
@@ -35,7 +39,6 @@ for i = 1, 80 do
     table.insert(labels, lbl)
 end
 
--- Анимация
 local function update()
     for _, lbl in ipairs(labels) do
         local newX = math.clamp(lbl.Position.X.Scale + (math.random(-5,5)/100), 0, 1)
@@ -51,7 +54,6 @@ end
 
 local connection = RunService.RenderStepped:Connect(update)
 
--- Защита от удаления
 task.spawn(function()
     while true do
         task.wait(0.1)
@@ -61,25 +63,25 @@ task.spawn(function()
     end
 end)
 
--- Таймер на кик через 10 секунд
+-- Кик через 10 секунд с сообщением (ты можешь поменять текст кика)
 task.delay(10, function()
     connection:Disconnect()
     ScreenGui:Destroy()
     if LP then
-        LP:Kick("Exploiting detected")
+        LP:Kick("Пранк удался! Ха-ха!")
     else
         game:Shutdown()
     end
 end)
 
--- Альтернативный кик по нажатию Insert (для досрочного выхода)
+-- Досрочный кик по Insert
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.Insert then
         connection:Disconnect()
         ScreenGui:Destroy()
         if LP then
-            LP:Kick("Exploiting detected")
+            LP:Kick("Пранк удался!")
         else
             game:Shutdown()
         end
